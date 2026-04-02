@@ -1,0 +1,7 @@
+In this lab, you will get familiar with running AI/ML workloads on the Santa Clara University HPC.
+
+First, go to the AI/ML on the HPC course on Canvas (https://camino.instructure.com/courses/116808). Once you visit the course page, you first have to click the "+ Join this Course" button on the right to join the course.
+
+Next, go through all the videos and quizzes in the course, one module at a time. The next module will only be available once you pass the quiz from the current module. At the end of the course, you will receive a certificate. Download or print to PDF the certificate and upload it to the lab assignment to complete the lab.
+
+Unlike all other labs, which are due at the end of the lab class time, this lab is due Sunday night at 11:59 pm.
