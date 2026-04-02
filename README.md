@@ -10,8 +10,7 @@ I suggest creating a conda environment for examples in this class. All examples 
 module load Anaconda3
 conda create --name 140wi26 python=3.13 -y
 conda activate 140wi26
-conda install pytorch torchvision cudatoolkit -c pytorch -y
-python -m pip install matplotlib scipy pandas scikit-learn ucimlrepo
+python -m pip install --no-input torch torchvision torchaudio matplotlib scipy pandas scikit-learn ucimlrepo ipykernel
 python -m ipykernel install --user --name 140wi26
 ```
 
