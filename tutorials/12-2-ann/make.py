@@ -1,0 +1,127 @@
+import json
+
+notebook_12_2 = {
+    "cells": [
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "# Tutorial 12-2: Breaking Boundaries with Multi-Layer ANNs\n",
+                "**Course:** CSEN 140: Data Mining/Machine Learning  \n",
+                "**Instructor:** Dr. David C. Anastasiu\n",
+                "\n",
+                "--- \n",
+                "## Objective\n",
+                "We now solve the Sonar classification task using an **Artificial Neural Network (ANN)** with a hidden layer. We will demonstrate how adding internal 'neurons' allows the network to learn non-linear decision surfaces that a single Perceptron cannot.\n",
+                "\n",
+                "### Theoretical Context\n",
+                "Training an ANN means learning the weights of multiple connected neurons. By using an **activation function** (like Sigmoid or ReLU) in the hidden layer, we introduce the non-linearity required to separate complex data. We will use **Xavier Initialization** to ensure weights are not set to zero, avoiding symmetry that prevents learning."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "import torch\n",
+                "import torch.nn as nn\n",
+                "import torch.optim as optim\n",
+                "from sklearn.datasets import fetch_openml\n",
+                "from sklearn.model_selection import train_test_split\n",
+                "from sklearn.preprocessing import StandardScaler, LabelEncoder\n",
+                "\n",
+                "# Load same Sonar data as 12-1\n",
+                "sonar = fetch_openml(name='sonar', version=1, as_frame=False)\n",
+                "le = LabelEncoder()\n",
+                "y = le.fit_transform(sonar.target)\n",
+                "scaler = StandardScaler()\n",
+                "X = scaler.fit_transform(sonar.data)\n",
+                "\n",
+                "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n",
+                "X_train, X_test = torch.FloatTensor(X_train), torch.FloatTensor(X_test)\n",
+                "y_train, y_test = torch.FloatTensor(y_train).view(-1, 1), torch.FloatTensor(y_test).view(-1, 1)"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 2. Architecture: Input, Hidden, and Output Layers\n",
+                "Following the notation from the slides, our model features an input layer ($x$), a hidden layer ($a^{[2]}$), and an output layer ($a^{[3]}$)."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "class MultiLayerANN(nn.Module):\n",
+                "    def __init__(self, input_dim, hidden_dim):\n",
+                "        super(MultiLayerANN, self).__init__()\n",
+                "        self.layer1 = nn.Linear(input_dim, hidden_dim)\n",
+                "        self.relu = nn.ReLU()\n",
+                "        self.layer2 = nn.Linear(hidden_dim, 1)\n",
+                "        self.sigmoid = nn.Sigmoid()\n",
+                "        \n",
+                "        # Xavier/He Initialization\n",
+                "        nn.init.kaiming_uniform_(self.layer1.weight, nonlinearity='relu')\n",
+                "        nn.init.xavier_uniform_(self.layer2.weight)\n",
+                "        \n",
+                "    def forward(self, x):\n",
+                "        # Forward Propagation\n",
+                "        a2 = self.relu(self.layer1(x))\n",
+                "        a3 = self.sigmoid(self.layer2(a2))\n",
+                "        return a3\n",
+                "\n",
+                "model = MultiLayerANN(X_train.shape[1], 24)\n",
+                "optimizer = optim.Adam(model.parameters(), lr=0.01)\n",
+                "criterion = nn.BCELoss()"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## 3. Training and Evaluation\n",
+                "We use Backpropagation to update the weights based on the error $\\delta$ of each node."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "for epoch in range(200):\n",
+                "    outputs = model(X_train)\n",
+                "    loss = criterion(outputs, y_train)\n",
+                "    optimizer.zero_grad()\n",
+                "    loss.backward()\n",
+                "    optimizer.step()\n",
+                "\n",
+                "with torch.no_grad():\n",
+                "    test_acc = (model(X_test).round().eq(y_test).sum() / float(len(y_test))).item()\n",
+                "    print(f\"ANN Multi-Layer Test Accuracy: {test_acc:.4f}\")"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## Conclusion\n",
+                "On the Sonar data, the **Multi-Layer ANN** outperforms the tuned linear model. The hidden layer acts as a 'feature engineer,' allowing the model to project inputs into a space where they become separable. This transition from simple sums to layered hierarchies is what powers Deep Learning."
+            ]
+        }
+    ],
+    "metadata": {
+        "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+        "language_info": {"name": "python", "version": "3.12.8"}
+    },
+    "nbformat": 4,
+    "nbformat_minor": 4
+}
+
+with open("Tutorial_12-2_MultiLayer_ANN.ipynb", "w") as f:
+    json.dump(notebook_12_2, f, indent=4)
